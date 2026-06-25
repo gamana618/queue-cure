@@ -1,1 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Queue Cure '26 | Receptionist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg-primary: #060b18;
+        --bg-secondary: #0a1228;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.06);
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --cyan: #00d4ff;
+        --cyan-glow: rgba(0, 212, 255, 0.15);
+        --blue: #3b82f6;
+        --purple: #8b5cf6;
+        --pink: #ec4899;
+        --green: #10b981;
+        --amber: #f59e0b;
+        --red: #ef4444;
+        --gradient-1: linear-gradient(135deg, #00d4ff 0%, #3b82f6 50%, #8b5cf6 100%);
+        --gradient-2: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        --gradient-3: linear-gradient(135deg, #00d4ff 0%, #10b981 100%);
+        --radius-lg: 24px;
+        --radius-md: 16px;
+        --radius-sm: 12px;
+        --shadow-glow: 0 8px 32px rgba(0, 212, 255, 0.12);
+        --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+    }
 
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    .bg-effects {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .bg-effects .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.3;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+
+    .bg-effects .orb:nth-child(1) {
+        width: 500px;
+        height: 500px;
+        background: var(--cyan);
+        top: -10%;
+        left: -5%;
+        animation-delay: 0s;
+    }
+
+    .bg-effects .orb:nth-child(2) {
+        width: 400px;
+        height: 400px;
+        background: var(--purple);
+        bottom: -10%;
+        right: -5%;
+        animation-delay: -7s;
+    }
+
+    .bg-effects .orb:nth-child(3) {
+        width: 300px;
+        height: 300px;
+        background: var(--pink);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation-delay: -14s;
+    }
+
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(30px, -40px) scale(1.1); }
+        50% { transform: translate(-20px, 30px) scale(0.9); }
+        75% { transform: translate(40px, 20px) scale(1.05); }
+    }
+
+    .bg-effects .grid {
+        position: absolute;
+        inset: 0;
+        background-image: 
+            linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+
+    #loginScreen {
+        position: relative;
+        z-index: 1;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .login-box {
+        width: 100%;
+        max-width: 400px;
+        padding: 48px 40px;
+        background: rgba(255,255,255,0.03);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius-lg);
+        text-align: center;
+        box-shadow: var(--shadow-card);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-1);
+    }
+
+    .login-logo {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 8px;
+        letter-spacing: 2px;
+    }
+
+    .login-logo .cure {
+        background: var(--gradient-1);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .login-sub {
+        color: var(--text-secondary);
+        font-size: 14px;
+        margin-bottom: 32px;
+        font-weight: 400;
+    }
+
+    .login-box input {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: white;
+        padding: 14px 18px;
+        border-radius: var(--radius-sm);
+        font-size: 15px;
+        width: 100%;
+        outline: none;
+        transition: all 0.3s;
+        font-family: inherit;
+    }
+
+    .login-box input::placeholder { color: var(--text-muted); }
+    .login-box input:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+    }
+
+    .btn-primary {
+        background: var(--gradient-1);
+        padding: 14px 32px;
+        border: none;
+        border-radius: var(--radius-sm);
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 16px;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 212, 255, 0.25);
+    }
+
+    #loginError {
+        color: var(--red);
+        font-size: 13px;
+        display: none;
+        margin-top: 14px;
+    }
+
+    #appShell {
+        display: none;
+        position: relative;
+        z-index: 1;
+    }
+
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 32px;
+        background: rgba(6, 11, 24, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .brand-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: var(--gradient-1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        flex-shrink: 0;
+    }
+
+    .brand-icon svg { width: 22px; height: 22px; }
+
+    .brand-name {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: 1px;
+    }
+
+    .brand-name .cure {
+        background: var(--gradient-1);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .brand-tag {
+        font-size: 11px;
+        color: var(--text-muted);
+        font-weight: 400;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        background: rgba(255,255,255,0.05);
+        padding: 2px 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .clinic-tag {
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .topbar-divider {
+        width: 1px;
+        height: 28px;
+        background: rgba(255,255,255,0.06);
+    }
+
+    .user-chip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 12px 6px 6px;
+        border-radius: 50px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--gradient-2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .user-meta { line-height: 1.2; }
+
+    .editable-name {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .editable-name .name-display {
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: all 0.3s;
+    }
+
+    .editable-name .name-display:hover {
+        background: rgba(255,255,255,0.05);
+    }
+
+    .editable-name .edit-icon {
+        width: 14px;
+        height: 14px;
+        opacity: 0.2;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: var(--text-muted);
+        flex-shrink: 0;
+    }
+
+    .editable-name .edit-icon:hover {
+        opacity: 1;
+        color: var(--cyan);
+    }
+
+    .user-role {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+        animation: pulse 2s infinite;
+        flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
+    .logout-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 6px;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-family: inherit;
+    }
+
+    .logout-btn:hover {
+        color: var(--red) !important;
+        background: rgba(239, 68, 68, 0.1) !important;
+    }
+
+    .logout-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .shell-body {
+        display: flex;
+        gap: 0;
+        min-height: calc(100vh - 74px);
+    }
+
+    .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        padding: 24px 16px;
+        background: rgba(6, 11, 24, 0.5);
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(255,255,255,0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        user-select: none;
+        position: relative;
+    }
+
+    .nav-item svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        transition: all 0.3s;
+    }
+
+    .nav-item:hover {
+        background: rgba(255,255,255,0.04);
+        color: var(--text-primary);
+        transform: translateX(4px);
+    }
+
+    .nav-item.active {
+        background: rgba(0, 212, 255, 0.08);
+        color: var(--cyan);
+    }
+
+    .nav-item.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 24px;
+        background: var(--gradient-1);
+        border-radius: 0 4px 4px 0;
+    }
+
+    .nav-item .badge {
+        margin-left: auto;
+        background: rgba(0, 212, 255, 0.12);
+        color: var(--cyan);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+    }
+
+    .sidebar-footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px;
+        border-top: 1px solid rgba(255,255,255,0.04);
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .main {
+        flex: 1;
+        padding: 28px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        min-width: 0;
+        max-height: calc(100vh - 74px);
+        overflow-y: auto;
+    }
+
+    .main::-webkit-scrollbar { width: 4px; }
+    .main::-webkit-scrollbar-track { background: transparent; }
+    .main::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+    }
+
+    .glass-card {
+        background: rgba(255,255,255,0.02);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        transition: all 0.4s;
+        box-shadow: var(--shadow-card);
+    }
+
+    .glass-card:hover {
+        border-color: rgba(255,255,255,0.08);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-label {
+        color: var(--text-muted);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .section-label .highlight { color: var(--cyan); }
+
+    .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    .row-queue {
+        display: grid;
+        grid-template-columns: 1fr 1.3fr;
+        gap: 24px;
+    }
+
+    .big-num {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        font-size: 72px;
+        line-height: 1;
+        letter-spacing: -2px;
+    }
+
+    .big-num.cyan {
+        background: var(--gradient-1);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .big-num.white { color: var(--text-primary); }
+
+    .big-num .unit {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-left: 8px;
+        font-family: 'Inter', sans-serif;
+        -webkit-text-fill-color: var(--text-muted);
+    }
+
+    .token-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .waveform {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 50px;
+    }
+
+    .waveform span {
+        width: 4px;
+        border-radius: 3px;
+        background: var(--gradient-1);
+        animation: waveAnim 1.2s ease-in-out infinite;
+    }
+
+    .waveform span:nth-child(1) { height: 16px; animation-delay: 0s; }
+    .waveform span:nth-child(2) { height: 30px; animation-delay: 0.1s; }
+    .waveform span:nth-child(3) { height: 44px; animation-delay: 0.2s; }
+    .waveform span:nth-child(4) { height: 26px; animation-delay: 0.3s; }
+    .waveform span:nth-child(5) { height: 38px; animation-delay: 0.4s; }
+    .waveform span:nth-child(6) { height: 18px; animation-delay: 0.5s; }
+
+    .waveform.idle span {
+        animation-play-state: paused;
+        opacity: 0.2;
+        height: 8px !important;
+    }
+
+    @keyframes waveAnim {
+        0%, 100% { transform: scaleY(0.4); }
+        50% { transform: scaleY(1); }
+    }
+
+    .sub-label {
+        color: var(--text-secondary);
+        font-size: 13px;
+        margin-top: 16px;
+        font-weight: 500;
+    }
+
+    .sub-value {
+        font-size: 20px;
+        font-weight: 600;
+        margin-top: 4px;
+        background: var(--gradient-1);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .btn {
+        padding: 14px 20px;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .btn:hover::after { opacity: 1; }
+
+    .btn-gradient {
+        background: var(--gradient-1);
+        box-shadow: 0 4px 20px rgba(0, 212, 255, 0.2);
+    }
+
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-outline {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: var(--text-secondary);
+    }
+
+    .btn-outline:hover {
+        background: rgba(255,255,255,0.06);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+    }
+
+    .btn-warning {
+        background: rgba(245, 158, 11, 0.12);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        color: var(--amber);
+    }
+
+    .btn-warning:hover {
+        background: rgba(245, 158, 11, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: var(--red);
+    }
+
+    .btn-danger:hover {
+        background: rgba(239, 68, 68, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .btn-full { width: 100%; }
+
+    .btn-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 14px 0;
+    }
+
+    .btn-row .btn {
+        padding: 12px 16px;
+        font-size: 13px;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    .panel-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .panel-head .count-pill {
+        background: rgba(0, 212, 255, 0.1);
+        color: var(--cyan);
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    ul.queue-list {
+        list-style: none;
+        padding: 0;
+        margin: 8px 0 0 0;
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    ul.queue-list::-webkit-scrollbar { width: 3px; }
+    ul.queue-list::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+    }
+
+    .queue-list li {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 6px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        transition: all 0.3s;
+        border-radius: 8px;
+    }
+
+    .queue-list li:hover {
+        background: rgba(255,255,255,0.02);
+        padding-left: 12px;
+    }
+
+    .queue-list li:last-child { border-bottom: none; }
+
+    .token-circle {
+        background: rgba(0, 212, 255, 0.08);
+        color: var(--cyan);
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+        font-family: 'Orbitron', sans-serif;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .patient-name-row {
+        font-weight: 600;
+        font-size: 14px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .patient-name-row span.pname {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .emergency-badge {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--red);
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        flex-shrink: 0;
+    }
+
+    .row-delete {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        width: auto;
+        padding: 4px 8px;
+        opacity: 0;
+        transition: all 0.3s;
+        cursor: pointer;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .queue-list li:hover .row-delete { opacity: 0.6; }
+    .row-delete:hover {
+        opacity: 1 !important;
+        color: var(--red);
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .empty-state {
+        color: var(--text-muted);
+        font-size: 14px;
+        text-align: center;
+        padding: 40px 0;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 8px;
+    }
+
+    .stat-box {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: var(--radius-md);
+        padding: 18px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        transition: all 0.3s;
+    }
+
+    .stat-box:hover {
+        background: rgba(255,255,255,0.04);
+        transform: translateY(-2px);
+    }
+
+    .stat-box .stat-num {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 28px;
+        font-weight: 900;
+        background: var(--gradient-1);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .stat-box .stat-label {
+        color: var(--text-muted);
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+    }
+
+    .stat-box svg {
+        width: 20px;
+        height: 20px;
+        color: var(--text-muted);
+        opacity: 0.3;
+    }
+
+    .avg-controls {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+    }
+
+    .icon-btn {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: var(--text-primary);
+        font-size: 24px;
+        font-weight: 700;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    .icon-btn:hover {
+        background: rgba(0, 212, 255, 0.1);
+        border-color: var(--cyan);
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+    }
+
+    .icon-btn:active { transform: scale(0.95); }
+
+    .icon-btn.minus:hover {
+        border-color: var(--red);
+        background: rgba(239, 68, 68, 0.1);
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+    }
+
+    .icon-btn.plus:hover {
+        border-color: var(--green);
+        background: rgba(16, 185, 129, 0.1);
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.1);
+    }
+
+    .hint {
+        color: var(--text-muted);
+        font-size: 12px;
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #settingsScreen {
+        display: none;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0 20px;
+    }
+
+    .toggle-row .toggle-label {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .toggle-row .toggle-sub {
+        font-size: 12.5px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    .switch {
+        position: relative;
+        width: 50px;
+        height: 28px;
+        flex-shrink: 0;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background: rgba(255,255,255,0.1);
+        border-radius: 28px;
+        transition: 0.3s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: 0.3s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .switch input:checked + .slider {
+        background: var(--amber);
+    }
+
+    .switch input:checked + .slider:before {
+        transform: translateX(22px);
+    }
+
+    .config-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .config-row input {
+        flex: 1;
+        min-width: 150px;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: white;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        outline: none;
+        font-family: inherit;
+    }
+
+    .config-row input:focus { border-color: var(--cyan); }
+
+    .config-row .btn {
+        padding: 12px 24px;
+        flex-shrink: 0;
+    }
+
+    .config-col {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .config-col input {
+        width: 100%;
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-box {
+        width: 100%;
+        max-width: 400px;
+        padding: 32px;
+        background: rgba(10, 18, 40, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        animation: modalIn 0.3s ease-out;
+    }
+
+    @keyframes modalIn {
+        from { opacity: 0; transform: scale(0.95) translateY(20px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-box h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .field-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin: 0 0 6px 2px;
+        display: block;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .field-group { margin-bottom: 16px; }
+
+    .field-group input {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: white;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        width: 100%;
+        outline: none;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .field-group input:focus { border-color: var(--cyan); }
+
+    .urgent-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-secondary);
+        font-size: 13px;
+        cursor: pointer;
+        margin: 4px 0 20px;
+    }
+
+    .urgent-check input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--red);
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .modal-actions .btn { flex: 1; padding: 14px; }
+
+    #offlineBanner {
+        display: none;
+        background: var(--red);
+        color: white;
+        padding: 12px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 9999;
+        letter-spacing: 0.5px;
+    }
+
+    .name-edit-modal .modal-box { max-width: 360px; }
+
+    .name-edit-modal .modal-box input {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: white;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 15px;
+        width: 100%;
+        outline: none;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .name-edit-modal .modal-box input:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+    }
+
+    @media (max-width: 1200px) {
+        .row-2, .row-queue { grid-template-columns: 1fr; }
+        .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+        .sidebar { display: none; }
+        .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+        .main { padding: 16px; }
+        .summary-grid { grid-template-columns: 1fr 1fr; }
+        .brand-tag { display: none; }
+        .clinic-tag { display: none; }
+        .big-num { font-size: 48px; }
+        .login-box { padding: 32px 24px; margin: 0 16px; }
+        .icon-btn { width: 40px; height: 40px; font-size: 20px; }
+        .config-row { flex-direction: column; }
+        .config-row input { min-width: 100%; }
+    }
+</style>
+</head>
+<body>
+
+<div class="bg-effects">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="grid"></div>
+</div>
+
+<div id="offlineBanner">⚠️ CONNECTION LOST — Reconnecting to clinic server...</div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+    <div class="login-box">
+        <div class="login-logo">Queue<span class="cure">Cure</span></div>
+        <p class="login-sub">Smart Queue. Happy You.</p>
+        <input type="password" id="adminPassword" placeholder="Enter system password" onkeypress="if(event.key==='Enter') attemptLogin()">
+        <button class="btn-primary" onclick="attemptLogin()">Secure Login</button>
+        <p id="loginError"></p>
+    </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="appShell">
+    <div class="topbar">
+        <div class="brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
+            <div class="brand-name">Queue<span class="cure">Cure</span></div>
+            <span class="brand-tag">v2.0</span>
+        </div>
+        <div class="topbar-right">
+            <span class="clinic-tag">🏥 Main Branch</span>
+            <div class="topbar-divider"></div>
+            <div class="user-chip">
+                <div class="avatar" id="userAvatar">AR</div>
+                <div class="user-meta">
+                    <div class="editable-name">
+                        <span class="name-display" id="userNameDisplay" onclick="editName()">Anita Reddy</span>
+                        <svg class="edit-icon" onclick="editName()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                    <div class="user-role">Receptionist</div>
+                </div>
+                <div class="status-dot"></div>
+                <div class="topbar-divider"></div>
+                <button class="logout-btn" onclick="logout()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="shell-body">
+        <div class="sidebar">
+            <div class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+                Dashboard
+            </div>
+            <div class="nav-item" data-tab="settings" onclick="switchTab('settings')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V19a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9c.2.6.7 1 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+                Settings
+                <span class="badge">⚙</span>
+            </div>
+            <div class="sidebar-footer">
+                <span class="status-dot" style="width:6px;height:6px;"></span>
+                System Live
+            </div>
+        </div>
+
+        <div class="main">
+            <!-- DASHBOARD -->
+            <div id="dashboardScreen" style="display:flex; flex-direction:column; gap:24px;">
+                <div class="row-2">
+                    <div class="glass-card">
+                        <div class="section-label">Current <span class="highlight">Token</span></div>
+                        <div class="token-card-top">
+                            <div class="big-num cyan" id="activeTokenNum">--</div>
+                            <div class="waveform idle" id="waveform"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                        </div>
+                        <div class="sub-label">Now Consulting</div>
+                        <div class="sub-value" id="activeName">Waiting for next patient...</div>
+                    </div>
+
+                    <div class="glass-card">
+                        <div class="section-label">Average <span class="highlight">Consultation</span></div>
+                        <div class="big-num white" style="margin-top:8px;"><span id="avgTimeDisplay">05:00</span><span class="unit">min</span></div>
+                        <div class="avg-controls">
+                            <button class="icon-btn minus" onclick="adjustAvgTime(-1)">−</button>
+                            <button class="icon-btn plus" onclick="adjustAvgTime(1)">+</button>
+                        </div>
+                        <div class="hint">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                            Based on <span id="patientsSeenHint">0</span> consultations
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row-queue">
+                    <div class="glass-card">
+                        <div class="section-label">Queue <span class="highlight">Management</span></div>
+                        <button class="btn btn-gradient btn-full" id="callNextBtn" onclick="callNext()" style="margin-top:16px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg>
+                            CALL NEXT TOKEN
+                        </button>
+                        <div class="btn-row">
+                            <button class="btn btn-outline" onclick="recallToken()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 4v4h4"/></svg>
+                                Recall
+                            </button>
+                            <button class="btn btn-warning" onclick="skipCurrent()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4v16l11-8L5 4z"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+                                Send to Bottom
+                            </button>
+                        </div>
+                        <button class="btn btn-outline btn-full" onclick="openAddModal()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 19c0-3 2.7-5 6-5s6 2 6 5"/><path d="M18 8v4M16 10h4"/></svg>
+                            Add Patient
+                        </button>
+                    </div>
+
+                    <div class="glass-card">
+                        <div class="panel-head">
+                            <div class="section-label" style="margin-bottom:0;">Upcoming <span class="highlight">Tokens</span></div>
+                            <span class="count-pill" id="upcomingCount">0</span>
+                        </div>
+                        <ul class="queue-list" id="queueList">
+                            <li><div class="empty-state">No patients waiting</div></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="section-label">Today's <span class="highlight">Summary</span></div>
+                    <div class="summary-grid">
+                        <div class="stat-box">
+                            <div><div class="stat-label">Total</div><div class="stat-num" id="statTotal">0</div></div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 19c0-3 2.7-5 6-5s6 2 6 5"/><path d="M16 4.5c1.5.3 2.5 1.6 2.5 3s-1 2.7-2.5 3M18.5 14c1.7.4 2.5 1.6 2.5 3"/></svg>
+                        </div>
+                        <div class="stat-box">
+                            <div><div class="stat-label">Consulted</div><div class="stat-num" id="statConsulted">0</div></div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                        </div>
+                        <div class="stat-box">
+                            <div><div class="stat-label">In Queue</div><div class="stat-num" id="statQueue">0</div></div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                        </div>
+                        <div class="stat-box">
+                            <div><div class="stat-label">Avg. Time</div><div class="stat-num" id="statAvg">5</div></div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 9v4l2.5 1.5M9 2h6"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div id="settingsScreen">
+                <div class="glass-card">
+                    <div class="section-label">Security <span class="highlight">Settings</span></div>
+                    
+                    <div style="padding: 8px 0 16px 0;">
+                        <div class="toggle-label" style="margin-bottom:8px;">Change Password</div>
+                        <div class="config-col">
+                            <input type="password" id="currentPassword" placeholder="Current Password">
+                            <input type="password" id="newPassword" placeholder="New Password (min 6 chars)">
+                            <button class="btn btn-gradient" onclick="changePassword()" style="width:100%;">
+                                🔒 Update Password
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top:1px solid rgba(255,255,255,0.04); padding-top:16px;">
+                        <div class="toggle-label" style="margin-bottom:8px;">Undo Last Call</div>
+                        <button class="btn btn-warning" onclick="undoLastCall()" style="width:100%;">
+                            ↩️ Undo Last Patient
+                        </button>
+                        <div class="toggle-sub" style="margin-top:6px;">Restores the last patient who was called</div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="section-label">Clinic <span class="highlight">Settings</span></div>
+                    <div class="toggle-row">
+                        <div>
+                            <div class="toggle-label">Doctor Break</div>
+                            <div class="toggle-sub">Pauses "Call Next" until resumed</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="breakToggle" onchange="toggleBreak()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div style="border-top:1px solid rgba(255,255,255,0.04); padding-top:18px;">
+                        <div class="toggle-label" style="margin-bottom:10px;">Manual Avg. Time Override</div>
+                        <div class="config-row">
+                            <input type="number" id="manualWaitTime" placeholder="Minutes">
+                            <button class="btn btn-outline" onclick="updateConfig()">Update</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card">
+                    <div class="section-label" style="margin-bottom: 14px;">Danger <span class="highlight">Zone</span></div>
+                    <button class="btn btn-danger btn-full" onclick="clearQueue()">🚨 Clear Entire Queue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD PATIENT MODAL -->
+<div class="modal-overlay" id="addModalOverlay">
+    <div class="modal-box">
+        <h3>Add Patient</h3>
+        <div class="field-group">
+            <label class="field-label">Patient Name</label>
+            <input type="text" id="patientName" placeholder="e.g. Priya Singh">
+        </div>
+        <div class="field-group">
+            <label class="field-label">Phone Number</label>
+            <input type="text" id="patientPhone" placeholder="e.g. 98765 43210">
+        </div>
+        <label class="urgent-check">
+            <input type="checkbox" id="isEmergency"> Mark as urgent / emergency
+        </label>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+            <button class="btn btn-gradient" onclick="addPatient()">Add to Queue</button>
+        </div>
+    </div>
+</div>
+
+<!-- NAME EDIT MODAL -->
+<div class="modal-overlay name-edit-modal" id="nameEditModal">
+    <div class="modal-box">
+        <h3>Edit Receptionist Name</h3>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Change the name displayed on the dashboard</p>
+        <div class="field-group">
+            <label class="field-label">Full Name</label>
+            <input type="text" id="nameEditInput" placeholder="Enter your name">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeNameEdit()">Cancel</button>
+            <button class="btn btn-gradient" onclick="saveName()">Save Name</button>
+        </div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    let currentAvgTime = 5;
+    let receptionistName = "Anita Reddy";
+
+    // Load saved name from localStorage
+    if (localStorage.getItem('receptionistName')) {
+        receptionistName = localStorage.getItem('receptionistName');
+    }
+
+    function updateDisplayName(name) {
+        document.getElementById('userNameDisplay').textContent = name;
+        const initials = name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+        document.getElementById('userAvatar').textContent = initials;
+    }
+
+    function editName() {
+        document.getElementById('nameEditModal').style.display = 'flex';
+        document.getElementById('nameEditInput').value = receptionistName;
+        document.getElementById('nameEditInput').focus();
+        document.getElementById('nameEditInput').select();
+    }
+
+    function closeNameEdit() {
+        document.getElementById('nameEditModal').style.display = 'none';
+    }
+
+    function saveName() {
+        const newName = document.getElementById('nameEditInput').value.trim();
+        if (newName && newName.length >= 2) {
+            receptionistName = newName;
+            localStorage.setItem('receptionistName', newName);
+            socket.emit('update_name', { name: newName });
+            updateDisplayName(newName);
+            closeNameEdit();
+        } else {
+            alert('Please enter a valid name (at least 2 characters)');
+        }
+    }
+
+    document.getElementById('nameEditModal').addEventListener('click', (e) => {
+        if (e.target.id === 'nameEditModal') closeNameEdit();
+    });
+
+    document.getElementById('nameEditInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') saveName();
+    });
+
+    // ===== LOGIN =====
+    function attemptLogin() {
+        const password = document.getElementById('adminPassword').value;
+        const name = localStorage.getItem('receptionistName') || 'Anita Reddy';
+        
+        if (!password) {
+            document.getElementById('loginError').textContent = 'Please enter password';
+            document.getElementById('loginError').style.display = 'block';
+            return;
+        }
+        
+        // Clear any previous error
+        document.getElementById('loginError').style.display = 'none';
+        
+        // Send login request to server
+        socket.emit('login', { password, name });
+    }
+
+    // ===== LOGOUT =====
+    function logout() {
+        if (confirm('Are you sure you want to logout?')) {
+            socket.disconnect();
+            document.getElementById('appShell').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('loginError').style.display = 'none';
+            socket.connect();
+        }
+    }
+
+    // ===== SOCKET EVENTS =====
+    socket.on('connect', () => {
+        console.log('✅ Socket connected');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('❌ Socket disconnected');
+        document.getElementById('offlineBanner').style.display = 'block';
+    });
+
+    socket.on('connect', () => {
+        document.getElementById('offlineBanner').style.display = 'none';
+    });
+
+    // Login success
+    socket.on('login_success', (data) => {
+        console.log('✅ Login successful:', data);
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appShell').style.display = 'block';
+        receptionistName = data.name;
+        localStorage.setItem('receptionistName', data.name);
+        updateDisplayName(data.name);
+        document.getElementById('loginError').style.display = 'none';
+    });
+
+    // Login error
+    socket.on('login_error', (msg) => {
+        console.log('❌ Login failed:', msg);
+        document.getElementById('loginError').textContent = msg;
+        document.getElementById('loginError').style.display = 'block';
+    });
+
+    // Force logout (from another device)
+    socket.on('force_logout', (msg) => {
+        alert('⚠️ ' + msg + '\nYou will be logged out.');
+        document.getElementById('appShell').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('loginError').textContent = 'Session ended: ' + msg;
+        document.getElementById('loginError').style.display = 'block';
+        socket.disconnect();
+        socket.connect();
+    });
+
+    // Password changed
+    socket.on('password_changed', (msg) => {
+        alert('✅ ' + msg);
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+    });
+
+    socket.on('password_error', (msg) => {
+        alert('❌ ' + msg);
+    });
+
+    // Undo
+    socket.on('undo_success', (msg) => {
+        alert('✅ ' + msg);
+    });
+
+    socket.on('undo_error', (msg) => {
+        alert('⚠️ ' + msg);
+    });
+
+    // Name updated
+    socket.on('name_updated', (newName) => {
+        receptionistName = newName;
+        localStorage.setItem('receptionistName', newName);
+        updateDisplayName(newName);
+    });
+
+    // Error messages
+    socket.on('error_msg', (msg) => {
+        alert("⚠️ " + msg);
+    });
+
+    // ===== CHANGE PASSWORD =====
+    function changePassword() {
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        
+        if (!currentPassword || !newPassword) {
+            alert('Please fill in both fields');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            alert('New password must be at least 6 characters');
+            return;
+        }
+        
+        socket.emit('change_password', { 
+            currentPassword, 
+            newPassword 
+        });
+    }
+
+    // ===== UNDO LAST CALL =====
+    function undoLastCall() {
+        socket.emit('undo_last_call');
+    }
+
+    // ===== TAB SWITCHING =====
+    function switchTab(tab) {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelector(`.nav-item[data-tab="${tab}"]`)?.classList.add('active');
+
+        document.getElementById('dashboardScreen').style.display = 'none';
+        document.getElementById('settingsScreen').style.display = 'none';
+
+        if (tab === 'dashboard') {
+            document.getElementById('dashboardScreen').style.display = 'flex';
+        } else if (tab === 'settings') {
+            document.getElementById('settingsScreen').style.display = 'flex';
+        }
+    }
+
+    // ===== ADD PATIENT MODAL =====
+    function openAddModal() { 
+        document.getElementById('addModalOverlay').style.display = 'flex'; 
+        document.getElementById('patientName').focus(); 
+    }
+    function closeAddModal() { 
+        document.getElementById('addModalOverlay').style.display = 'none'; 
+    }
+    document.getElementById('addModalOverlay').addEventListener('click', (e) => { 
+        if (e.target.id === 'addModalOverlay') closeAddModal(); 
+    });
+
+    function addPatient() {
+        const name = document.getElementById('patientName').value.trim();
+        const phone = document.getElementById('patientPhone').value.trim();
+        const isEmergency = document.getElementById('isEmergency').checked;
+        if (!name) {
+            alert('Please enter patient name');
+            return;
+        }
+        socket.emit('add_patient', { name, phone, isEmergency });
+        document.getElementById('patientName').value = '';
+        document.getElementById('patientPhone').value = '';
+        document.getElementById('isEmergency').checked = false;
+        closeAddModal();
+    }
+
+    // ===== QUEUE ACTIONS =====
+    function callNext() {
+        const btn = document.getElementById('callNextBtn');
+        btn.disabled = true;
+        const original = btn.innerHTML;
+        btn.textContent = "⏳ Processing...";
+        socket.emit('call_next');
+        setTimeout(() => { 
+            btn.disabled = false; 
+            btn.innerHTML = original; 
+        }, 1500);
+    }
+
+    function skipCurrent() { 
+        socket.emit('skip_current'); 
+    }
+    
+    function recallToken() { 
+        socket.emit('recall_token'); 
+    }
+    
+    function toggleBreak() { 
+        socket.emit('toggle_break'); 
+    }
+
+    function adjustAvgTime(delta) {
+        const next = Math.max(1, currentAvgTime + delta);
+        socket.emit('update_config', next);
+    }
+    
+    function updateConfig() {
+        const val = document.getElementById('manualWaitTime').value;
+        if (val) { 
+            socket.emit('update_config', val); 
+            document.getElementById('manualWaitTime').value = ''; 
+        }
+    }
+    
+    function clearQueue() {
+        if (confirm("⚠️ This will clear the entire queue. Continue?")) 
+            socket.emit('clear_queue');
+    }
+    
+    function deletePatient(targetToken) {
+        if (confirm("Remove this patient from the queue?")) 
+            socket.emit('delete_patient', targetToken);
+    }
+    
+    function formatMins(mins) {
+        const m = String(mins).padStart(2, '0');
+        return `${m}:00`;
+    }
+
+    // ===== RECEIVE UPDATES =====
+    socket.on('queue_updated', (data) => {
+        currentAvgTime = data.avgConsultTimeMins;
+
+        const callBtn = document.getElementById('callNextBtn');
+        callBtn.style.opacity = data.isDoctorOnBreak ? "0.4" : "1";
+        callBtn.disabled = !!data.isDoctorOnBreak;
+        document.getElementById('breakToggle').checked = !!data.isDoctorOnBreak;
+
+        const waveform = document.getElementById('waveform');
+        if (data.activeToken) {
+            document.getElementById('activeTokenNum').textContent = `${data.activeToken.tokenNumber}`;
+            document.getElementById('activeName').textContent = data.activeToken.name + (data.activeToken.isEmergency ? '  🔴 Urgent' : '');
+            waveform.classList.toggle('idle', !!data.isDoctorOnBreak);
+        } else {
+            document.getElementById('activeTokenNum').textContent = "--";
+            document.getElementById('activeName').textContent = "Waiting for next patient...";
+            waveform.classList.add('idle');
+        }
+
+        document.getElementById('avgTimeDisplay').textContent = formatMins(data.avgConsultTimeMins);
+        document.getElementById('patientsSeenHint').textContent = data.patientsSeen;
+
+        document.getElementById('upcomingCount').textContent = data.queue.length;
+        const queueList = document.getElementById('queueList');
+        queueList.innerHTML = '';
+        if (data.queue.length === 0) {
+            queueList.innerHTML = '<li><div class="empty-state">No patients waiting</div></li>';
+        } else {
+            data.queue.forEach(patient => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="token-circle">${patient.tokenNumber}</span>
+                    <span class="patient-name-row">
+                        <span class="pname">${patient.name}</span>
+                        ${patient.isEmergency ? '<span class="emergency-badge">Urgent</span>' : ''}
+                    </span>
+                    <button class="row-delete" onclick="deletePatient(${patient.tokenNumber})">✖</button>
+                `;
+                queueList.appendChild(li);
+            });
+        }
+
+        document.getElementById('statTotal').textContent = data.totalPatients;
+        document.getElementById('statConsulted').textContent = data.patientsSeen;
+        document.getElementById('statQueue').textContent = data.queue.length;
+        document.getElementById('statAvg').textContent = data.avgConsultTimeMins;
+    });
+
+    // Update name from server on connect
+    socket.on('queue_updated', (data) => {
+        if (data.receptionistName) {
+            receptionistName = data.receptionistName;
+            localStorage.setItem('receptionistName', data.receptionistName);
+            updateDisplayName(data.receptionistName);
+        }
+    });
+
+    // Initial display name update
+    updateDisplayName(receptionistName);
+</script>
+</body>
+</html>
