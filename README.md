@@ -82,42 +82,7 @@ Alternative Password	AG1234
 Receptionist Name	Aruna (editable)
 Note: If the password doesn't work, check your config.json file to see what password is stored.
 
-Receptionist Dashboard
-Add patients with name and phone
 
-Mark emergency patients (auto-priority)
-
-Call next token
-
-Undo last call
-
-Send patient to bottom
-
-View upcoming tokens
-
-Today's summary stats
-
-Change password
-
-Edit receptionist name
-
-Toggle doctor break
-
-Patient Waiting Room
-Current token being consulted
-
-Tokens ahead count
-
-Estimated wait time (calculated in real-time)
-
-Upcoming tokens list
-
-Voice announcements
-
-Professional display
-
-// Track actual consultation times
-avgConsultTime = totalConsultTime / patientsSeen
 
 // Estimate wait for each patient
 estimatedWait = queue.length × avgConsultTime
